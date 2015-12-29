@@ -21,7 +21,8 @@ namespace GetFileDownload
 
         public static void Main(string[] args)
         {
-
+            //I get this information from appSetings()  -- <add key="input" value="C:\Desenvolvimento\input\D_quina.zip"/>
+            string input = System.Configuration.ConfigurationManager.AppSettings["input"].ToString();
 
             byte[] result = null;
             byte[] buffer = new byte[4097];
