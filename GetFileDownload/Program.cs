@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.IO.Compression;
 using HtmlAgilityPack;
 
+
+
 namespace GetFileDownload
 {
     class Program
@@ -16,7 +18,7 @@ namespace GetFileDownload
 
         static string output = System.Configuration.ConfigurationManager.AppSettings["output"].ToString();
         static string input = System.Configuration.ConfigurationManager.AppSettings["input"].ToString();
-        static string quinaHtml = System.Configuration.ConfigurationManager.AppSettings["quinaHtm"].ToString(); 
+        static string quinaHtml = System.Configuration.ConfigurationManager.AppSettings["quinaHtm"].ToString();
         static string quinaTxt = System.Configuration.ConfigurationManager.AppSettings["quinaTxt"].ToString();
 
         public static void Main(string[] args)
@@ -40,7 +42,7 @@ namespace GetFileDownload
                 WebResponse response = webReq.GetResponse();
 
                 Stream stream = response.GetResponseStream();
-                    
+
                 StreamReader reader = new StreamReader(stream);
 
                 int count = 0;
@@ -48,7 +50,7 @@ namespace GetFileDownload
                 do
                 {
                     count = stream.Read(buffer, 0, buffer.Length);
-                    oMemory.Write(buffer,0,count);
+                    oMemory.Write(buffer, 0, count);
 
                     if (count == 0)
                     {
@@ -61,14 +63,14 @@ namespace GetFileDownload
 
                 FileStream ofile = new FileStream(input, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
-                ofile.Write(result,0,result.Length);
+                ofile.Write(result, 0, result.Length);
 
                 ofile.Close();
 
                 oMemory.Close();
                 stream.Close();
                 extractFile();
-                
+
                 System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
 
 
@@ -89,7 +91,7 @@ namespace GetFileDownload
         public static void extractFile()
         {
 
-            ZipFile.ExtractToDirectory(input,output);
+            ZipFile.ExtractToDirectory(input, output);
 
         }
 
@@ -101,7 +103,7 @@ namespace GetFileDownload
             if (sVerificacao)
             {
                 File.Delete(input);
-              
+
             }
 
         }
@@ -110,40 +112,65 @@ namespace GetFileDownload
         {
             List<string> listResultFile = new List<string>();
             HtmlDocument doc = new HtmlDocument();
+            
 
             doc.Load(quinaHtml);
-            int count = 0;
+
+
+            Chilkat.HtmlToText obj = new Chilkat.HtmlToText();
+
+            obj.ToText(quinaHtml);
+
+            int count = 1;
+
+
+
+            foreach (HtmlNode item in doc.DocumentNode.SelectNodes("//tr[@bgcolor=#D9E6F4]"))
+            {
+
+                string teste = item.InnerText;
+
+            }
+
+
 
             foreach (HtmlNode itemNode in doc.DocumentNode.SelectNodes("//td"))
             {
+                JogoQuina oJogo = new JogoQuina();
 
-              
+                oJogo.concurso = itemNode.InnerText;
+
+
                 listResultFile.Add(itemNode.InnerText);
 
-               
-               
+
+
             }
+
+
 
             string[] array = listResultFile.ToArray();
 
+        
             StreamWriter outputFile = new StreamWriter(quinaTxt);
-            foreach (var item in listResultFile)
+          
+            foreach (var item in array)
             {
-
                
-                if (count == 19)
+                if ((count % 19) == 0)
                 {
-               
+                    outputFile.Write(item.ToString());
                     outputFile.WriteLine();
-                    count = 0;
+                    count++;
+                    
                 }
                 else
                 {
-                  
+
                     outputFile.Write(item.ToString() + ";");
                     count++;
                 }
-               
+
             }
 
             outputFile.Close();
@@ -151,5 +178,66 @@ namespace GetFileDownload
             Console.ReadLine();
 
         }
+
+
+        public static ListaJogoQuina populaJogoQuina(string[] array)
+        {
+            int count = 0;
+            JogoQuina oJogos = new JogoQuina();
+            ListaJogoQuina listQuina = new ListaJogoQuina();
+            for (int i = 0; i < array.Length; i++)
+            {
+
+                oJogos.concurso = array[count];
+                count++;
+                oJogos.data = array[count];
+                count++;
+                oJogos.number1 = array[count];
+                count++;
+                oJogos.number2 = array[count];
+                count++;
+                oJogos.number3 = array[count];
+                count++;
+                oJogos.number4 = array[count];
+                count++;
+                oJogos.number5 = array[count];
+                count++;
+                oJogos.arrecadacaoTotal = array[count];
+                count++;
+                oJogos.ganhadoresQuina = array[count];
+                count++;
+                oJogos.cidade = array[count];
+                count++;
+                oJogos.uf = array[count];
+                count++;
+                oJogos.rateioquina = array[count];
+                count++;
+                oJogos.ganhadoresQuadra = array[count];
+                count++;
+                oJogos.rateioQuadra = array[count];
+                count++;
+                oJogos.ganhadoresTerno = array[count];
+                count++;
+                oJogos.rateioTerno = array[count];
+                count++;
+                oJogos.acumulado = array[count];
+                count++;
+                oJogos.valorAcumaldo = array[count];
+                count++;
+                oJogos.estimativaPremio = array[count];
+                count++;
+                oJogos.sorteioEspecial = array[count];
+                count++;
+
+                listQuina.Add(oJogos);
+            }
+
+            return listQuina;
+
+            }
+
+        }
+
     }
-}
+    
+
